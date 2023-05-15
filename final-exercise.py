@@ -10,8 +10,7 @@ def extract_text_from_powerpoint(filepath):
             for shape in slide.shapes:
                 if shape.has_text_frame:
                     for paragraph in shape.text_frame.paragraphs:
-                        for run in paragraph.runs:
-                            text.append(run.text)
+                        text.append(paragraph.text)
             text_list.append(' '.join(text))
         return text_list
     except Exception as e:
