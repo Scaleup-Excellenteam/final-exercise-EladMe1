@@ -1,4 +1,5 @@
 import asyncio
+import json
 import openai
 from pptx import Presentation
 
@@ -40,11 +41,10 @@ async def ask_chatgpt(prompt):
     Returns:
         str: The generated response from the ChatGPT model.
     """
-    openai.api_key = "API_KEY"
+    openai.api_key = "API-KEY"
     response =  await asyncio.to_thread(openai.ChatCompletion.create,
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": ""},
             {"role": "user", "content": prompt}
         ],
     )
@@ -53,7 +53,22 @@ async def ask_chatgpt(prompt):
     return ""
 
 
+def save_explanations_on_json_file(answer, jason_file_name):
+    """
+        Saves the explanations to a JSON file.
+
+        Args:
+            explanations (list): List of explanations.
+            filename (str): Name of the output JSON file.
+        """
+    json.dump(answer, open(jason_file_name, "w"))
+
+
 async def main():
+    """
+      Main function to extract text from PowerPoint, generate explanations using ChatGPT,
+      and save the explanations to a JSON file.
+      """
     file_path = input("Enter the file path to the PowerPoint presentation: ")
     text = await extract_text_from_powerpoint(file_path)
 
@@ -64,6 +79,8 @@ async def main():
         explanations.append(response_text)
     print(explanations)
 
+    explanationsFile = "explanations.json"
+    save_explanations_on_json_file(explanations,explanationsFile)
 
 if __name__ == '__main__':
     asyncio.run(main())
