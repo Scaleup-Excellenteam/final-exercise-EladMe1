@@ -1,7 +1,15 @@
 import asyncio
 import json
+import os
 import openai
 from pptx import Presentation
+from dotenv import load_dotenv
+
+# Load environment variables from API.env
+load_dotenv("API.env")
+
+# Access the API key
+API_KEY = os.getenv("API_KEY")
 
 
 async def extract_text_from_powerpoint(filepath):
@@ -41,7 +49,7 @@ async def ask_chatgpt(prompt):
     Returns:
         str: The generated response from the ChatGPT model.
     """
-    openai.api_key = "API-KEY"
+    openai.api_key = API_KEY
     response =  await asyncio.to_thread(openai.ChatCompletion.create,
         model="gpt-3.5-turbo",
         messages=[
@@ -53,25 +61,34 @@ async def ask_chatgpt(prompt):
     return ""
 
 
-def save_explanations_on_json_file(answer, jason_file_name):
+def save_explanations_on_json_file(explanations, jason_file_name):
     """
         Saves the explanations to a JSON file.
 
         Args:
             explanations (list): List of explanations.
             filename (str): Name of the output JSON file.
+
+        Return: None
         """
-    json.dump(answer, open(jason_file_name, "w"))
+    json.dump(explanations, open(jason_file_name, "w"))
 
 
 async def main():
     """
       Main function to extract text from PowerPoint, generate explanations using ChatGPT,
       and save the explanations to a JSON file.
+
+      Args: None
+      Return: None
       """
+
+    #get the file pptx from user
     file_path = input("Enter the file path to the PowerPoint presentation: ")
     text = await extract_text_from_powerpoint(file_path)
 
+    #loop on all the silde and send one slide each time to OpenAi Api
+    #save the answer from OpenAi in list
     explanations = []
     for slide_text in text:
         prompt = f"Can you pls explain to me about: {slide_text}\n\n"
@@ -79,6 +96,7 @@ async def main():
         explanations.append(response_text)
     print(explanations)
 
+    #save the explanations in json file by name explanations
     explanationsFile = "explanations.json"
     save_explanations_on_json_file(explanations,explanationsFile)
 
