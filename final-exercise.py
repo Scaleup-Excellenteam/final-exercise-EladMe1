@@ -1,15 +1,7 @@
 import asyncio
-import os
-from dotenv import load_dotenv
 from extract_text import extract_text_from_powerpoint
 from chatgpt import generate_explanation
 from save_file import save_explanations_on_json_file
-
-# Load environment variables from API.env
-load_dotenv("API.env")
-
-# Access the API key
-API_KEY = os.getenv("API_KEY")
 
 
 async def main() -> None:
@@ -22,8 +14,8 @@ async def main() -> None:
 
     explanations: list[str] = []
     for slide_text in text:
-        prompt: str = f"Can you please explain to me about: {slide_text}\n\n"
-        response_text: str = await generate_explanation(prompt, API_KEY)
+        prompt: str = f"Can you please explain to me about this slide: {slide_text}\n\n"
+        response_text: str = await generate_explanation(prompt)
         explanations.append(response_text)
 
     print(explanations)

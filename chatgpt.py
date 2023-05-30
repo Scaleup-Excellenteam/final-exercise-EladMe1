@@ -1,22 +1,28 @@
 import asyncio
+import os
 import time
-
 import openai
+from dotenv import load_dotenv
 
-# Rate limit for free users
-RATE_LIMIT: int = 3  # 3 requests per minute
+# Load environment variables from API.env
+load_dotenv()
+
+# Access the API key
+API_KEY = os.getenv("API_KEY")
+
+# 3 requests per minute
+RATE_LIMIT: int = 3
 
 # Variables to track rate limit
 request_count: int = 0
 last_request_time: float = 0
 
-async def generate_explanation(prompt: str, api_key: str) -> str:
+async def generate_explanation(prompt: str) -> str:
     """
     Generates a response from the ChatGPT model based on a given prompt.
 
     Args:
         prompt (str): The prompt for generating the response.
-        api_key (str): The API key.
 
     Returns:
         str: The generated response from the ChatGPT model.
@@ -32,7 +38,7 @@ async def generate_explanation(prompt: str, api_key: str) -> str:
         request_count = 0
         last_request_time = current_time
 
-    openai.api_key = api_key
+    openai.api_key = API_KEY
     response = await asyncio.to_thread(openai.ChatCompletion.create,
         model="gpt-3.5-turbo",
         messages=[
