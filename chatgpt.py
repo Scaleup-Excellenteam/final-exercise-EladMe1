@@ -5,7 +5,7 @@ import openai
 from dotenv import load_dotenv
 
 # Load environment variables from API.env
-load_dotenv()
+load_dotenv("API.env")
 
 # Access the API key
 API_KEY = os.getenv("API_KEY")
