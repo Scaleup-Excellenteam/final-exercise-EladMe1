@@ -1,6 +1,8 @@
 import os
-import time
+
 import uuid
+from datetime import datetime
+
 from flask import Flask, render_template, request, jsonify
 
 
@@ -34,7 +36,7 @@ def upload():
             _, extension = os.path.splitext(original_filename)
 
             # Generate a timestamp for the file upload
-            timestamp = int(time.time())
+            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
 
             # Generate the new filename with original filename, timestamp, and UID
             new_filename = f"{original_filename}_{timestamp}_{uid}{extension}"
