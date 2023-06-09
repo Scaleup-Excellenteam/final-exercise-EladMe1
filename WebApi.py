@@ -114,7 +114,7 @@ def extract_timestamp(file):
 
 
 def is_pending(uid):
-    files = os.listdir('pending')
+    files = os.listdir('uploads') + os.listdir('pending')
     for file in files:
         if uid in file:
             original_filename = extract_filename(file)
