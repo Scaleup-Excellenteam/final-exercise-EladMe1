@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Upload</title>
+</head>
+<body>
+    <h1>Upload a PowerPoint presentation</h1>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <br>
+        <input type="submit" value="Upload">
+    </form>
+
+    <h1>Check File with UID</h1>
+    <form method="GET" action="/check_file">
+        <label for="uid">UID:</label>
+        <input type="text" id="uid" name="uid">
+        <br>
+        <input type="submit" value="Check">
+    </form>
+</body>
+</html>
