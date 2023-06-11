@@ -41,6 +41,17 @@ async def main() -> None:
 
 
 def handle_pending(file_path, action):
+    """
+       Move or remove a file from the pending folder.
+
+       Args:
+           file_path (str): The path of the file to be moved or removed.
+           action (str): The action to perform. Can be "add" to move the file to the pending folder or "remove" to delete
+               the file from the pending folder.
+
+       Returns:
+           None
+       """
     file_name = os.path.basename(file_path)
     pending_dir = 'pending'
 
