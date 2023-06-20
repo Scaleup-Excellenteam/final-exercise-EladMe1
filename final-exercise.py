@@ -3,6 +3,8 @@ import os
 import re
 import shutil
 
+from database import Upload, session
+
 from extract_text import extract_text_from_powerpoint
 from chatgpt import generate_explanation
 from save_file import save_explanations_on_json_file
@@ -37,22 +39,27 @@ async def main() -> None:
 
             save_explanations_on_json_file(explanations, new_file_path)
 
-            handle_pending(file_path, "remove")
+            handle_pending(file_path, "remove")  # Update status and finish time in the database
 
 
 def handle_pending(file_path, action):
     """
-       Move or remove a file from the pending folder.
+    Move or remove a file from the pending folder.
 
-       Args:
-           file_path (str): The path of the file to be moved or removed.
-           action (str): The action to perform. Can be "add" to move the file to the pending folder or "remove" to delete
-               the file from the pending folder.
+    Args:
+        file_path (str): The path of the file to be moved or removed.
+        action (str): The action to perform. Can be "add" to move the file to the pending folder or "remove" to delete
+            the file from the pending folder.
 
-       Returns:
-           None
-       """
+    Returns:
+        None
+    """
     file_name = os.path.basename(file_path)
+    match = re.search(r"_([a-f0-9-]+)\.pptx", file_name)
+
+    if match:
+        uidFile = match.group(1)
+
     pending_dir = 'pending'
 
     if action == "add":
@@ -65,6 +72,12 @@ def handle_pending(file_path, action):
         file_in_pending = os.path.join(pending_dir, file_name)
         if os.path.exists(file_in_pending):
             os.remove(file_in_pending)
+            # Update status and finish time in the database
+            upload = session.query(Upload).filter_by(uid=uidFile).first()
+            if upload:
+                upload.status = "done"
+                upload.set_finish_time()
+                session.commit()
 
 
 if __name__ == '__main__':
