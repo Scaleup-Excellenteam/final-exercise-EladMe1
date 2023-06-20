@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 
+from database import User, session, Upload
 
 app = Flask(__name__)
 
@@ -54,7 +55,8 @@ def upload():
             # Save the uploaded file to the "uploads" directory with the new filename
             file_path = os.path.join("uploads", new_filename)
             file.save(file_path)
-
+            email = request.form.get('email')
+            save_on_db(email,uid,original_filename)
             # Return the UID in a JSON response
             return jsonify({"uid": uid}), 200
     except Exception as e:
@@ -221,6 +223,40 @@ def allowed_file(filename):
       """
     # Check if the file has a valid extension (.pptx)
     return "." in filename and filename.rsplit(".", 1)[1].lower() == "pptx"
+
+
+def save_on_db(email, uidFile ,filename):
+    if email:
+        # User provided an email, check if it exists in Users table
+        user = session.query(User).filter_by(email=email).first()
+
+        # email already registered
+        if user:
+            upload = Upload(filename=filename, status=get_file_status(uidFile), uidFile=uidFile, user_id=user.id)
+        else:
+            # User doesn't exist, create a new User
+            user = User(email=email)
+            session.add(user)
+            session.commit()
+            upload = Upload(filename=filename, status=get_file_status(uidFile), uidFile=uidFile, user_id=user.id)
+    else:
+        # User did not provide an email, create Upload without User
+        upload = Upload(filename=filename, status=get_file_status(uidFile), uidFile=uidFile)
+
+    session.add(upload)
+    session.commit()
+
+
+def get_file_status(uidFile):
+    try:
+        upload = session.query(Upload).filter_by(uid=uidFile).first()
+        if upload:
+            return upload.status
+        else:
+            return 'pending'
+
+    except Exception as e:
+        return 'not found'
 
 
 if __name__ == '__main__':
