@@ -14,10 +14,16 @@
         <input type="submit" value="Upload">
     </form>
 
-    <h1>Check File with UID</h1>
+    <h1>Check File with UID or Email + File Name</h1>
     <form method="GET" action="/check_file">
         <label for="uid">UID:</label>
         <input type="text" id="uid" name="uid">
+        <br>
+        <label for="email">Email:</label>
+        <input type="email" id="emailcheck" name="email" placeholder="Optional">
+        <br>
+        <label for="file_name">File Name:</label>
+        <input type="text" id="file_name" name="file_name" placeholder="Optional">
         <br>
         <input type="submit" value="Check">
     </form>

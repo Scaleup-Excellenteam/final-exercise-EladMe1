@@ -73,10 +73,20 @@ def check_file():
       """
     try:
         uid = request.args.get("uid")
+        email = request.args.get("email")
+        file_name = request.args.get("file_name")
         if uid:
             file = session.query(Upload).filter_by(uid=uid).first()
 
             if file.status == "done" or file.status == "pending":
+                data = extract_data(file)
+                return jsonify(data), 200
+
+        if email and file_name:
+            file = session.query(Upload).join(User).filter(User.email == email, Upload.filename == file_name,
+                                                           User.id == Upload.user_id).order_by(Upload.upload_time.desc()).first()
+
+            if file:
                 data = extract_data(file)
                 return jsonify(data), 200
 
