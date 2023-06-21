@@ -74,14 +74,11 @@ def check_file():
     try:
         uid = request.args.get("uid")
         if uid:
-            done_success, done_data = is_done(uid)
+            file = session.query(Upload).filter_by(uid=uid).first()
 
-            if done_success:
-                return jsonify(done_data), 200
-
-            pending_success, pending_data = is_pending(uid)
-            if pending_success:
-                return jsonify(pending_data), 200
+            if file.status == "done" or file.status == "pending":
+                data = extract_data(file)
+                return jsonify(data), 200
 
         return jsonify({"message": f"No file with UID {uid} found."}), 404
 
@@ -89,7 +86,7 @@ def check_file():
         return jsonify({"message": f"An error occurred: {str(e)}"}), 500
 
 
-def is_done(uid):
+def extract_data(file):
     """
       Check if a file with the given UID is done processing.
 
@@ -99,22 +96,15 @@ def is_done(uid):
       Returns:
           tuple: A tuple indicating if the file is done processing (bool) and the file data (dict).
       """
-    files = os.listdir('outputs')
-    for file in files:
-        if uid in file:
-            original_filename = extract_filename(file)
-            timestamp = extract_timestamp(file)
-            explanation = get_explanation(uid)
-            return True, {
-                "status": "done",
-                "filename": original_filename,
-                "timestamp": timestamp,
-                "explanation": explanation
-            }
-    return False, {}  # File not found, return False and an empty dictionary
+    return {
+        "status": file.status,
+        "filename": file.filename,
+        "timestamp": file.upload_time,
+        "explanation": get_explanation(file)
+    }
 
 
-def get_explanation(uid):
+def get_explanation(filename):
     """
        Get the explanation for a file with the given UID.
 
@@ -126,12 +116,12 @@ def get_explanation(uid):
        """
     files = os.listdir('outputs')
     for file in files:
-        if uid in file:
+        if filename.uid in file:
             with open(os.path.join('outputs', file), 'r') as f:
                 json_data = f.read()
                 data = json.loads(json_data)
                 return data
-    return None
+    return "None"
 
 
 def extract_filename(file):
@@ -166,7 +156,7 @@ def extract_timestamp(file):
     return format_timestamp(timestamp)
 
 
-def is_pending(uid):
+def is_pending(file):
     """
     Check if a file with the given UID is still pending.
 
@@ -176,18 +166,12 @@ def is_pending(uid):
     Returns:
         tuple: A tuple indicating if the file is pending (bool) and the file data (dict).
     """
-    files = os.listdir('uploads') + os.listdir('pending')
-    for file in files:
-        if uid in file:
-            original_filename = extract_filename(file)
-            timestamp = extract_timestamp(file)
-            return True, {
-                "status": "pending",
-                "filename": original_filename,
-                "timestamp": timestamp,
-                "explanation": "None"
+    return {
+                "status": file.status,
+                "filename": file.filename,
+                "timestamp": file.upload_time,
+                "explanation": get_explanation(file)
             }
-    return False, {}
 
 
 def format_timestamp(timestamp):
