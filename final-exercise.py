@@ -17,12 +17,13 @@ async def main() -> None:
     """
     while True:
         await asyncio.sleep(10)
-        # Scan the uploads folder
-        files = os.listdir('uploads')
+        # Scan from database
+        files_pending = session.query(Upload).filter_by(status="pending").all()
 
         # Process each file
-        for file in files:
-            file_path = os.path.join('uploads', file)
+        for file in files_pending:
+            uid = file.uid
+            file_path = "uploads\\" + uid + ".pptx"
             print(file_path)
             text: list[str] = await extract_text_from_powerpoint(file_path)
             handle_pending(file_path, "add")
@@ -55,11 +56,7 @@ def handle_pending(file_path, action):
         None
     """
     file_name = os.path.basename(file_path)
-    match = re.search(r"_([a-f0-9-]+)\.pptx", file_name)
-
-    if match:
-        uidFile = match.group(1)
-
+    uidFile = file_path.split('\\')[-1].split('.')[0]
     pending_dir = 'pending'
 
     if action == "add":
@@ -82,3 +79,5 @@ def handle_pending(file_path, action):
 
 if __name__ == '__main__':
     asyncio.run(main())
+
+

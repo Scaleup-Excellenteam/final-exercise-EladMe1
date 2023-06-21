@@ -5,7 +5,6 @@ import uuid
 
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify
-
 from database import User, session, Upload
 
 app = Flask(__name__)
@@ -50,7 +49,8 @@ def upload():
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
 
             # Generate the new filename with original filename, timestamp, and UID
-            new_filename = f"{original_filename}_{timestamp}_{uid}{extension}"
+            #new_filename = f"{original_filename}_{timestamp}_{uid}{extension}"
+            new_filename = f"{uid}{extension}"
 
             # Save the uploaded file to the "uploads" directory with the new filename
             file_path = os.path.join("uploads", new_filename)
@@ -250,11 +250,7 @@ def save_on_db(email, uidFile ,filename):
 def get_file_status(uidFile):
     try:
         upload = session.query(Upload).filter_by(uid=uidFile).first()
-        if upload:
-            return upload.status
-        else:
-            return 'pending'
-
+        return upload.status if upload else 'pending'
     except Exception as e:
         return 'not found'
 
