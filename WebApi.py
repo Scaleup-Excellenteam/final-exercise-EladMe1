@@ -96,15 +96,15 @@ def check_file():
         return jsonify({"message": f"An error occurred: {str(e)}"}), 500
 
 
-def extract_data(file):
+def extract_data(file) -> dict:
     """
-      Check if a file with the given UID is done processing.
+      Extracts the data from an Upload object.
 
       Args:
-          uid (str): The UID of the file.
+          file (Upload): The Upload object to extract data from.
 
       Returns:
-          tuple: A tuple indicating if the file is done processing (bool) and the file data (dict).
+          dict: A dictionary containing the extracted data with keys 'status', 'filename', 'timestamp', and 'explanation'.
       """
     return {
         "status": file.status,
@@ -119,7 +119,7 @@ def get_explanation(filename):
        Get the explanation for a file with the given UID.
 
        Args:
-           uid (str): The UID of the file.
+           filename (str): The file in the database.
 
        Returns:
            dict or None: The explanation data as a dictionary, or None if the file is not found.
@@ -164,24 +164,6 @@ def extract_timestamp(file):
     if timestamp_match:
         timestamp = timestamp_match.group(1)
     return format_timestamp(timestamp)
-
-
-def is_pending(file):
-    """
-    Check if a file with the given UID is still pending.
-
-    Args:
-        uid (str): The UID of the file.
-
-    Returns:
-        tuple: A tuple indicating if the file is pending (bool) and the file data (dict).
-    """
-    return {
-                "status": file.status,
-                "filename": file.filename,
-                "timestamp": file.upload_time,
-                "explanation": get_explanation(file)
-            }
 
 
 def format_timestamp(timestamp):

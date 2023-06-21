@@ -9,6 +9,9 @@ Base = declarative_base()
 
 
 class User(Base):
+    """
+        User model representing a user in the system.
+        """
     __tablename__ = 'users'
 
     id = mapped_column(Integer, primary_key=True)
@@ -17,6 +20,9 @@ class User(Base):
 
 
 class Upload(Base):
+    """
+        Upload model representing a file upload.
+        """
     __tablename__ = 'uploads'
 
     id = mapped_column(Integer, primary_key=True)
@@ -29,7 +35,7 @@ class Upload(Base):
 
     user = relationship('User', back_populates='uploads')
 
-    def __init__(self, filename, status, uidFile, user_id=None):
+    def __init__(self, filename: str, status: str, uidFile: str, user_id: int = None):
         self.uid = str(uuid.uuid4())
         self.filename = filename
         self.upload_time = datetime.now()
@@ -38,15 +44,33 @@ class Upload(Base):
         self.uid = uidFile
 
     def upload_path(self) -> str:
+        """
+               Returns the upload path of the file.
+               """
         return f'/uploads/{self.uid}/{self.filename}'
 
     def set_finish_time(self):
+        """
+                Sets the finish time of the upload to the current datetime.
+                """
         self.finish_time = datetime.now()
 
     def set_status(self, status: str):
+        """
+               Sets the status of the upload.
+
+               Args:
+                   status (str): The status of the upload.
+               """
         self.status = status
 
     def add_error_message(self, error_message: str):
+        """
+              Adds an error message to the upload.
+
+              Args:
+                  error_message (str): The error message to add.
+              """
         pass
 
 
