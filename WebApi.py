@@ -78,7 +78,7 @@ def check_file():
         if uid:
             file = session.query(Upload).filter_by(uid=uid).first()
 
-            if file.status == "done" or file.status == "pending":
+            if file:
                 data = extract_data(file)
                 return jsonify(data), 200
 
@@ -116,22 +116,26 @@ def extract_data(file) -> dict:
 
 def get_explanation(filename):
     """
-       Get the explanation for a file with the given UID.
+    Get the explanation for a file with the given UID.
 
-       Args:
-           filename (str): The file in the database.
+    Args:
+        filename (Upload): The Upload object representing the file in the database.
 
-       Returns:
-           dict or None: The explanation data as a dictionary, or None if the file is not found.
-       """
-    files = os.listdir('outputs')
-    for file in files:
-        if filename.uid in file:
-            with open(os.path.join('outputs', file), 'r') as f:
-                json_data = f.read()
-                data = json.loads(json_data)
-                return data
-    return "None"
+    Returns:
+        dict or None: The explanation data as a dictionary, or None if the file is not found.
+    """
+    if filename.status == "pending":
+        return "None"
+
+    try:
+        with open(os.path.join('outputs', filename.uid + ".json"), 'r') as f:
+            json_data = f.read()
+            data = json.loads(json_data)
+            return data
+    except FileNotFoundError:
+        return "None"
+    except Exception as e:
+        return "None"
 
 
 def extract_filename(file):
@@ -203,20 +207,16 @@ def allowed_file(filename):
 
 def save_on_db(email, uidFile ,filename):
     if email:
-        # User provided an email, check if it exists in Users table
         user = session.query(User).filter_by(email=email).first()
 
-        # email already registered
         if user:
             upload = Upload(filename=filename, status=get_file_status(uidFile), uidFile=uidFile, user_id=user.id)
         else:
-            # User doesn't exist, create a new User
             user = User(email=email)
             session.add(user)
             session.commit()
             upload = Upload(filename=filename, status=get_file_status(uidFile), uidFile=uidFile, user_id=user.id)
     else:
-        # User did not provide an email, create Upload without User
         upload = Upload(filename=filename, status=get_file_status(uidFile), uidFile=uidFile)
 
     session.add(upload)
